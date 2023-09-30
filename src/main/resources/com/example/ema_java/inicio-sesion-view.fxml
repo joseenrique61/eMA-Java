@@ -16,5 +16,6 @@
     <Label text="Iniciar sesión"/>
     <TextField fx:id="tField"/>
     <PasswordField fx:id="pwField"/>
-    <Button text="Hello!" onAction="#onHelloButtonClick"/>
+    <Button text="Iniciar sesión" onAction="#onIniciarSesionButtonClick"/>
+    <Button text="Crear nuevo usuario" onAction="#onRegistrarButtonClick"/>
 </VBox>

@@ -4,6 +4,7 @@ module com.example.ema_java {
 
     requires org.controlsfx.controls;
     requires com.dlsc.formsfx;
+    requires java.sql;
 
     opens com.example.ema_java to javafx.fxml;
     exports com.example.ema_java;

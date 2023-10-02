@@ -1,46 +1,43 @@
 package com.example.ema_java.controllers;
 
-import com.example.ema_java.classes.DatabaseConnection;
+import com.example.ema_java.services.DatabaseService;
+import com.example.ema_java.eMAApplication;
+import com.example.ema_java.services.NavigationService;
 import javafx.fxml.FXML;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 
-import java.io.IOException;
-import java.util.Objects;
-
-public class InicioSesionController {
+public class InicioSesionController extends ControllerBase {
     @FXML
-    private TextField tField;
+    private TextField tUsuario;
     @FXML
     private PasswordField pwField;
+    @FXML
+    private Label errorLabel;
+
+    public InicioSesionController(NavigationService.WindowType window) {
+        super(window);
+    }
 
     @FXML
-    protected void onIniciarSesionButtonClick() throws IOException {
-        if (Objects.equals(tField.getText(), "hola") && Objects.equals(pwField.getText(), "hola")) {
-            DatabaseConnection.connect();
-//            Stage inicio = new Stage();
-//            FXMLLoader fxmlLoader = new FXMLLoader(eMAApplication.class.getResource("inicio-usuario-view.fxml"));
-//            Scene scene = new Scene(fxmlLoader.load(), 320, 240);
-//            inicio.setTitle("Inicio");
-//            inicio.setScene(scene);
-//            inicio.show();
-//
-//            eMAApplication.windows.get("inicioDeSesion").hide();
+    protected void onIniciarSesionButtonClick() {
+        if (eMAApplication.databaseService.checkUserIsCorrect(tUsuario.getText(), pwField.getText())) {
+            showInicioUsuario();
+        }
+        else {
+            errorLabel.setVisible(true);
         }
     }
 
     @FXML
-    protected void onRegistrarButtonClick() throws IOException {
-        if (Objects.equals(tField.getText(), "hola") && Objects.equals(pwField.getText(), "hola")) {
-            DatabaseConnection.connect();
-//            Stage inicio = new Stage();
-//            FXMLLoader fxmlLoader = new FXMLLoader(eMAApplication.class.getResource("inicio-usuario-view.fxml"));
-//            Scene scene = new Scene(fxmlLoader.load(), 320, 240);
-//            inicio.setTitle("Inicio");
-//            inicio.setScene(scene);
-//            inicio.show();
-//
-//            eMAApplication.windows.get("inicioDeSesion").hide();
-        }
+    protected void onRegistrarButtonClick() {
+        showRegistrarUsuario();
+    }
+
+    private void showInicioUsuario() {
+        eMAApplication.navigationService.goToNewWindow(NavigationService.WindowType.INICIO_USUARIO, NavigationService.WindowType.INICIO_SESION, tUsuario.getText());
+    }
+
+    private void showRegistrarUsuario(){
+        eMAApplication.navigationService.goToNewWindow(NavigationService.WindowType.REGISTRAR_USUARIO, NavigationService.WindowType.INICIO_SESION);
     }
 }

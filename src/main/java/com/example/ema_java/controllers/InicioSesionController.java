@@ -21,6 +21,7 @@ public class InicioSesionController extends ControllerBase {
     @FXML
     protected void onIniciarSesionButtonClick() {
         if (eMAApplication.databaseService.checkUserIsCorrect(tUsuario.getText(), pwField.getText())) {
+            eMAApplication.usuario = tUsuario.getText();
             showInicioUsuario();
         }
         else {
@@ -34,10 +35,10 @@ public class InicioSesionController extends ControllerBase {
     }
 
     private void showInicioUsuario() {
-        eMAApplication.navigationService.goToNewWindow(NavigationService.WindowType.INICIO_USUARIO, NavigationService.WindowType.INICIO_SESION, tUsuario.getText());
+        eMAApplication.navigationService.goToNewWindow(NavigationService.WindowType.INICIO_USUARIO, window, tUsuario.getText());
     }
 
     private void showRegistrarUsuario(){
-        eMAApplication.navigationService.goToNewWindow(NavigationService.WindowType.REGISTRAR_USUARIO, NavigationService.WindowType.INICIO_SESION);
+        eMAApplication.navigationService.goToNewWindow(NavigationService.WindowType.REGISTRAR_USUARIO, window);
     }
 }

@@ -14,4 +14,8 @@ public class HistoriaModel {
     public String ExamenFisico;
 
     public String Diagnostico;
+
+    public String Recipe;
+
+    public String Indicaciones;
 }

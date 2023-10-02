@@ -38,11 +38,6 @@ public class RegistroUsuarioController extends ControllerBase {
             errorLabel.setVisible(true);
             return;
         }
-        else if (checkEmpty() && checkNotSamePassword()) {
-            errorLabel.setText("Todos los campos deben estar llenos.\nLas contraseñas deben ser iguales.");
-            errorLabel.setVisible(true);
-            return;
-        }
         else if (checkEmpty()) {
             errorLabel.setText("Todos los campos deben estar llenos.");
             errorLabel.setVisible(true);
@@ -68,9 +63,9 @@ public class RegistroUsuarioController extends ControllerBase {
     }
 
     private boolean checkEmpty() {
-        return tUsuario.getText().isEmpty() && tNombre.getText().isEmpty()
-                && tCedula.getText().isEmpty() && tEspecialidad.getText().isEmpty()
-                && pwContrasena.getText().isEmpty() == pwRepetirContrasena.getText().isEmpty();
+        return Objects.equals(tUsuario.getText(), "") || Objects.equals(tNombre.getText(), "")
+                || Objects.equals(tCedula.getText(), "") || Objects.equals(tEspecialidad.getText(), "")
+                || Objects.equals(pwContrasena.getText(), "") || Objects.equals(pwRepetirContrasena.getText(), "");
     }
 
     private boolean checkNotSamePassword() {
@@ -78,8 +73,6 @@ public class RegistroUsuarioController extends ControllerBase {
     }
 
     private void showInicioDeSesion() {
-        eMAApplication.windows.get("inicioDeSesion").show();
-        eMAApplication.windows.get("registroUsuario").close();
-        eMAApplication.windows.remove("registroUsuario");
+        eMAApplication.navigationService.goToNewWindow(NavigationService.WindowType.INICIO_SESION, window);
     }
 }

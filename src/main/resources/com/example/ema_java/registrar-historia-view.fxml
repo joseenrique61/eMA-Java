@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.ScrollPane?>
+<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
+    </padding>
+
+    <Label text="Registrar paciente"/>
+
+    <Label fx:id="lbNombre"/>
+    <Label fx:id="lbCedula"/>
+    <Label fx:id="lbEdad"/>
+
+    <ScrollPane>
+        <VBox alignment="CENTER">
+            <Label text="Antecedentes:"/>
+            <TextArea fx:id="tAntecedentes"/>
+            <Label text="Alergias:"/>
+            <TextArea fx:id="tAlergias"/>
+            <Label text="Enfermedad actual:"/>
+            <TextArea fx:id="tEnfAct"/>
+            <Label text="Motivo de consulta:"/>
+            <TextArea fx:id="tMotCons"/>
+            <Label text="Examen físico:"/>
+            <TextArea fx:id="tExFis"/>
+            <Label text="Recipe:"/>
+            <TextArea fx:id="tRecipe"/>
+            <Label text="Indicaciones:"/>
+            <TextArea fx:id="tIndicaciones"/>
+            <Label text="Diagnóstico:"/>
+            <TextArea fx:id="tDiagnostico"/>
+        </VBox>
+    </ScrollPane>
+
+    <Label fx:id="errorLabel" visible="false"/>
+    <Button text="Guardar" onAction="#onGuardarButtonClick"/>
+</VBox>

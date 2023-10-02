@@ -1,5 +1,6 @@
 package com.example.ema_java.services;
 
+import com.example.ema_java.models.HistoriaModel;
 import com.example.ema_java.models.MedicoModel;
 import com.example.ema_java.models.PacienteModel;
 import javafx.collections.FXCollections;
@@ -10,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.*;
+import java.time.LocalDate;
 
 public class DatabaseService {
     public Connection connection;
@@ -23,7 +25,7 @@ public class DatabaseService {
                         "FROM Usuarios " +
                         "WHERE Usuario = '" + usuario + "' AND Contrasena = '" + contrasena + "'" +
                         "LIMIT 1";
-        return hasRows(connection, sqlReader);
+        return hasRows(sqlReader);
     }
 
     public boolean checkUserAvailability(String usuario) {
@@ -31,7 +33,7 @@ public class DatabaseService {
                            "FROM Usuarios " +
                            "WHERE Usuario = '" + usuario + "'" +
                            "LIMIT 1";
-        return hasRows(connection, sqlReader);
+        return hasRows(sqlReader);
     }
 
     public boolean checkPacienteAvailability(String cedula) {
@@ -39,7 +41,14 @@ public class DatabaseService {
                            "FROM Pacientes " +
                            "WHERE Cedula = '" + cedula + "'" +
                            "LIMIT 1";
-        return hasRows(connection, sqlReader);
+        return hasRows(sqlReader);
+    }
+
+    public boolean checkFechaExists(LocalDate date, String usuario, String cedula) {
+        String sqlFecha = "SELECT Fecha FROM Historias WHERE Fecha = '" + date + "'" +
+                "AND Medico_Id = (SELECT Medico_Id FROM Usuarios WHERE Usuario = '" + usuario + "')" +
+                "AND Paciente_Id = (SELECT Paciente_Id FROM Pacientes WHERE Cedula = '" + cedula + "')";
+        return hasRows(sqlFecha);
     }
 
     public void createUser(String usuario, String contrasena, MedicoModel medicoModel) {
@@ -64,6 +73,26 @@ public class DatabaseService {
         try {
             Statement statement = connection.createStatement();
             statement.execute(sqlPaciente);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public void createHistoria(HistoriaModel historiaModel, String usuario, String cedula) {
+        String sqlHistoria;
+        if (checkFechaExists(LocalDate.now(), usuario, cedula)) {
+            sqlHistoria = "UPDATE Historias " +
+                    "SET MotCons = '" + historiaModel.MotivoDeConsulta + "', EnfAct = '" + historiaModel.EnfermedadActual + "', Antecedentes = '" + historiaModel.Antecedentes + "', Alergias = '" + historiaModel.Alergias + "', ExFis = '" + historiaModel.ExamenFisico + "', Recipe = '" + historiaModel.Recipe + "', Indicaciones = '" + historiaModel.Indicaciones + "', Diagnostico = '" + historiaModel.Diagnostico + "' " +
+                    "WHERE Fecha = '" + LocalDate.now() + "'";
+        }
+        else {
+            sqlHistoria = "INSERT INTO Historias ('Paciente_Id', 'Medico_Id', 'Fecha', 'MotCons', 'EnfAct', 'Antecedentes', 'Alergias', 'ExFis', 'Recipe', 'Indicaciones', 'Diagnostico')\n" +
+                    "VALUES ((SELECT Paciente_Id FROM Pacientes WHERE Cedula = '" + cedula + "'), (SELECT Medico_Id FROM Usuarios WHERE Usuario = '" + usuario + "'), '" + LocalDate.now() + "', '" + historiaModel.MotivoDeConsulta + "', '" + historiaModel.EnfermedadActual + "', '" + historiaModel.Antecedentes + "', '" + historiaModel.Alergias + "', '" + historiaModel.ExamenFisico + "', '" + historiaModel.Recipe + "', '" + historiaModel.Indicaciones + "', '" + historiaModel.Diagnostico + "')";
+        }
+
+        try {
+            Statement statement = connection.createStatement();
+            statement.execute(sqlHistoria);
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
@@ -117,6 +146,38 @@ public class DatabaseService {
         return pacienteModel;
     }
 
+    public HistoriaModel getHistoriaModel(String usuario, String cedula, String fecha) {
+        HistoriaModel historiaModel = new HistoriaModel();
+
+        String sqlHistoria = "SELECT * " +
+                "FROM Historias " +
+                "WHERE Paciente_Id = (SELECT Paciente_Id FROM Pacientes WHERE Cedula = '" + cedula + "')" +
+                "AND Medico_Id = (SELECT Medico_Id FROM Usuarios WHERE Usuario = '" + usuario + "')" +
+                "AND Fecha = '" + fecha + "'" +
+                "LIMIT 1";
+
+        try {
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(sqlHistoria);
+
+            while (resultSet.next()) {
+                historiaModel.Fecha = resultSet.getString("Fecha");
+                historiaModel.MotivoDeConsulta = resultSet.getString("MotCons");
+                historiaModel.EnfermedadActual = resultSet.getString("EnfAct");
+                historiaModel.Antecedentes = resultSet.getString("Antecedentes");
+                historiaModel.Alergias = resultSet.getString("Alergias");
+                historiaModel.ExamenFisico = resultSet.getString("ExFis");
+                historiaModel.Diagnostico = resultSet.getString("Diagnostico");
+                historiaModel.Recipe = resultSet.getString("Recipe");
+                historiaModel.Indicaciones = resultSet.getString("Indicaciones");
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+
+        return historiaModel;
+    }
+
     public ObservableList<String> getPacientesList() {
         ObservableList<String> list = FXCollections.observableArrayList();
 
@@ -136,18 +197,17 @@ public class DatabaseService {
         return list;
     }
 
-    public ObservableList<String> getHistoriasList(String usuario, String cedula) {
+    public ObservableList<String> getFechasList(String usuario, String cedula) {
         ObservableList<String> list = FXCollections.observableArrayList();
 
-        String sqlHistorias = "SELECT Fecha " +
-                           "FROM Historias " +
-                           "WHERE Paciente_Id = (SELECT Paciente_Id FROM Historias WHERE Medico_Id = (" +
-                           "SELECT Medico_Id From Usuarios WHERE Usuario = '" + usuario + "')" +
-                           "AND Medico_Id = (SELECT Medico_Id From Usuarios WHERE Usuario = '" + usuario + "'))";
+        String sqlFecha = "SELECT Fecha " +
+                "FROM Historias " +
+                "WHERE Medico_Id = (SELECT Medico_Id FROM Usuarios WHERE Usuario = '" + usuario + "')" +
+                "AND Paciente_Id = (SELECT Paciente_Id FROM Pacientes WHERE Cedula = '" + cedula + "')";
 
         try {
             Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery(sqlHistorias);
+            ResultSet resultSet = statement.executeQuery(sqlFecha);
 
             while (resultSet.next()) {
                 list.add(resultSet.getString("Fecha"));
@@ -159,7 +219,7 @@ public class DatabaseService {
         return list;
     }
 
-    private boolean hasRows(Connection connection, String sqlReader) {
+    private boolean hasRows(String sqlReader) {
         try {
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(sqlReader);
@@ -207,6 +267,7 @@ public class DatabaseService {
     private void createTables(Connection connection) {
         String sqlHistoria = """
                 CREATE TABLE IF NOT EXISTS "Historias" (
+                \t"Historia_Id" INTEGER,
                 \t"Paciente_Id"\tINTEGER NOT NULL,
                 \t"Fecha"\tTEXT,
                 \t"MotCons"\tTEXT,
@@ -218,7 +279,7 @@ public class DatabaseService {
                 \t"Indicaciones"\tTEXT,
                 \t"Diagnostico"\tTEXT,
                 \t"Medico_Id"\tINTEGER NOT NULL,
-                \tPRIMARY KEY("Fecha")
+                \tPRIMARY KEY("Historia_Id" AUTOINCREMENT)
                 );""";
 
         String sqlPaciente = """

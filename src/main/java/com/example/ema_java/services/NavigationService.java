@@ -24,29 +24,32 @@ public class NavigationService {
     private final Dictionary<WindowType, WindowData> windowData = new Hashtable<>();
 
     public NavigationService() {
-        windowData.put(WindowType.INICIO_SESION, new WindowData("inicio-sesion-view.fxml", "Iniciar sesión", 320, 240));
+        windowData.put(WindowType.INICIO_SESION, new WindowData("inicio-sesion-view.fxml", "Iniciar sesión", 240, 320));
         windowData.put(WindowType.INICIO_USUARIO, new WindowData("inicio-usuario-view.fxml", "Inicio", 420, 540));
-        windowData.put(WindowType.REGISTRAR_USUARIO, new WindowData("registrar-usuario-view.fxml", "Registrar usuario", 320, 640));
-        windowData.put(WindowType.REGISTRAR_PACIENTE, new WindowData("registrar-paciente-view.fxml", "Registrar paciente", 320, 440));
+        windowData.put(WindowType.REGISTRAR_USUARIO, new WindowData("registrar-usuario-view.fxml", "Registrar usuario", 640, 320));
+        windowData.put(WindowType.REGISTRAR_PACIENTE, new WindowData("registrar-paciente-view.fxml", "Registrar paciente", 440, 320));
+        windowData.put(WindowType.REGISTRAR_HISTORIA, new WindowData("registrar-historia-view.fxml", "Registrar historia", 640, 520));
+        windowData.put(WindowType.LEER_HISTORIA, new WindowData("leer-historia-view.fxml", "Leer historia", 300, 300));
     }
 
     public void startApplication() {
-        Stage inicio = createScene(WindowType.INICIO_SESION);
+        Stage inicio = createScene(WindowType.INICIO_SESION, null);
         eMAApplication.windows.put(WindowType.INICIO_SESION, inicio);
     }
 
     public void goToNewWindow(WindowType newWindow, WindowType currentWindow, Object... params) {
-        Stage newStage = createScene(newWindow, params);
+        Stage newStage = createScene(newWindow, currentWindow, params);
         showNewWindow(currentWindow, newWindow, newStage);
     }
 
-    private Stage createScene(WindowType newWindow, Object... params) {
+    private Stage createScene(WindowType newWindow, WindowType currentWindow, Object... params) {
         ControllerBase controller = switch (newWindow) {
             case INICIO_SESION -> new InicioSesionController(newWindow);
-            case INICIO_USUARIO -> new InicioUsuarioController(newWindow, params[0].toString());
+            case INICIO_USUARIO -> new InicioUsuarioController(newWindow);
             case REGISTRAR_USUARIO -> new RegistroUsuarioController(newWindow);
             case REGISTRAR_PACIENTE -> new RegistroPacienteController(newWindow);
-            default -> null;
+            case REGISTRAR_HISTORIA -> new RegistroHistoriaController(newWindow, params[0].toString());
+            case LEER_HISTORIA -> new LeerHistoriaController(newWindow, params[0].toString(), params[1].toString());
         };
 
         Stage newStage = new Stage();
@@ -55,10 +58,12 @@ public class NavigationService {
 
             fxmlLoader.setController(controller);
 
-            Scene scene = new Scene(fxmlLoader.load(), windowData.get(newWindow).V_Size, windowData.get(newWindow).H_Size);
+            Scene scene = new Scene(fxmlLoader.load(), windowData.get(newWindow).H_Size, windowData.get(newWindow).V_Size);
 
-            if (controller != null) {
-                controller.setValues();
+            controller.setValues();
+
+            if (currentWindow != null && newWindow != WindowType.INICIO_USUARIO && newWindow != WindowType.INICIO_SESION) {
+                newStage.setOnCloseRequest((windowEvent) -> goToNewWindow(currentWindow, newWindow));
             }
 
             newStage.setTitle(windowData.get(newWindow).Title);

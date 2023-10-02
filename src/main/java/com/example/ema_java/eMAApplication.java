@@ -15,6 +15,8 @@ public class eMAApplication extends Application {
 
     public static DatabaseService databaseService = new DatabaseService();
 
+    public static String usuario;
+
     @Override
     public void start(Stage stage) {
         navigationService.startApplication();

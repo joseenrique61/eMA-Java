@@ -49,10 +49,10 @@ public class RegistroPacienteController extends ControllerBase {
     }
 
     private boolean checkEmpty() {
-        return tNombre.getText().isEmpty() && tCedula.getText().isEmpty() && tEdad.getText().isEmpty();
+        return tNombre.getText().isEmpty() || tCedula.getText().isEmpty() || tEdad.getText().isEmpty();
     }
 
     private void showInicioUsuario() {
-        eMAApplication.navigationService.goToNewWindow(NavigationService.WindowType.INICIO_USUARIO, NavigationService.WindowType.REGISTRAR_PACIENTE);
+        eMAApplication.navigationService.goToNewWindow(NavigationService.WindowType.INICIO_USUARIO, window);
     }
 }
